@@ -1,7 +1,7 @@
 <?php
 
 /**
- * enhance_sbv.php
+ * enhance_sbv.php <file> [break_down]
  * 
  * Simple script which enhances YouTube's .sbv files.
  */
@@ -21,6 +21,29 @@ class SbvLine
 		$this->start = $start;
 		$this->end = $end;
 	}
+}
+
+function find_space($line, $shift)
+{
+	if ($shift == 0)
+	{
+		$shift = -1;
+	}
+
+	$len = strlen($line);
+	$index = $len / 2;
+
+	while ($index >= 0 && $index < $len)
+	{
+		if (substr($line, $index, 1) === ' ')
+		{
+			break;
+		}
+
+		$index += $shift;
+	}
+
+	return $index;
 }
 
 /* main */
@@ -43,6 +66,32 @@ foreach ($lines as $line)
 	else if (!empty(trim($line)))
 	{
 		array_push($last->content, $line);
+	}
+}
+
+if (isset($_SERVER['argv'][2]) && ($_SERVER['argv'][2] === 'true' || $_SERVER['argv'][2] === '1'))
+{
+	foreach ($subs as $sub)
+	{
+		if (count($sub->content) == 1 && mb_strlen($sub->content[0]) > 50)
+		{
+			$line = $sub->content[0];
+			$len = strlen($line);
+			$half = $len / 2;
+			$l_index = find_space($line, -1);
+			$r_index = find_space($line, 1);
+			$index = abs($half - $l_index) < abs($half - $r_index) ? $l_index : $r_index;
+
+			if ($index >= 0 && $index < $len)
+			{
+				$sub->content = [
+					substr($line, 0, $index),
+					substr($line, $index)
+				];
+			}
+		}
+
+		$new_subs[] = $sub;
 	}
 }
 
@@ -72,6 +121,10 @@ foreach ($subs as $i => $sub)
 			{
 				$line = $line . ' ';
 			}
+		}
+		else if ($j == 0)
+		{
+			$line = rtrim($line) . ' ';
 		}
 
 		$output .= $line . "\n";
