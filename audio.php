@@ -33,5 +33,5 @@ foreach ($array as $value)
 
 
 file_put_contents(path('list.txt'), $output);
-exec(sprintf('ffmpeg -f concat -safe 0 -i %s -c copy full.wav', rpath('list.txt')));
+exec(sprintf('ffmpeg -f concat -safe 0 -i %s full.wav', rpath('list.txt')));
 unlink(rpath('list.txt'));
