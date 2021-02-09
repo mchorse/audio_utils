@@ -26,11 +26,14 @@ $list = exec("ls | grep -E '_\w+.aiff$'", $array);
 $silence = rpath('silence.aiff');
 $output = '';
 
+natsort($array);
+
+$array = array_values($array);
+
 foreach ($array as $value)
 {
 	$output .= "file './$value'\nfile '$silence'\n";
 }
-
 
 file_put_contents(path('list.txt'), $output);
 exec(sprintf('ffmpeg -f concat -safe 0 -i %s full.wav', rpath('list.txt')));
